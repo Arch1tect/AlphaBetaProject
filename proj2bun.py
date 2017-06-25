@@ -69,14 +69,17 @@ def get_score():
 		if node.owner:
 			node.owner.add_node_score(node)
 
-	print 'player1: ' + str(players[1].score)
-	print 'player2: ' + str(players[2].score)
+	# print 'player1: ' + str(players[1].score)
+	# print 'player2: ' + str(players[2].score)
+	score = players[1].score-players[2].score
+	print 'score ' + str(score)
 
 
 def find_best_move(frontier, playerId):
 
+	global counter
 	if len(frontier) == 0:
-		global counter
+		
 		print 'all visited: ' + str(counter)
 		counter = counter + 1
 		get_score()
@@ -90,9 +93,11 @@ def find_best_move(frontier, playerId):
 	# for node in sorted_frontier:
 	# 	print node.name,
 	# print ''
-
+	cant_color_any_node = True
 	for node in sorted_frontier:
-		frontier.remove(node)
+		
+
+		# find available colors for this node
 		non_adjacent_colors = set(colors)
 		for neighbor in node.neighbors:
 			if neighbor.color:
@@ -100,7 +105,10 @@ def find_best_move(frontier, playerId):
 		sorted_non_adjacent_colors = list(non_adjacent_colors)
 		sorted_non_adjacent_colors.sort()
 
+		frontier.remove(node)
 		for color in non_adjacent_colors:
+
+			cant_color_any_node = False
 
 			node.occupy(player, color)
 			new_neighbors = set()
@@ -113,6 +121,9 @@ def find_best_move(frontier, playerId):
 			node.free()
 		frontier.add(node)
 
+	if cant_color_any_node:
+		counter = counter + 1
+		get_score()
 
 
 with open("testcases/t5.txt", 'r') as f:
