@@ -8,10 +8,6 @@ class Player(object):
 	def __init__(self, id, preferenceLine):
 		self.id = id
 		self.preference = {}
-		self.init_value = max_val
-		if id == 2:
-			self.init_value = min_val
-		# self.score = 0
 
 		for pair in preferenceLine.split(', '):
 			dataList = pair.split(': ')
@@ -22,8 +18,6 @@ class Player(object):
 		if self.id == 2:
 			point = -point
 		return point
-	# def add_node_score(self, node):
-	# 	self.score += self.preference[node.color]
 
 
 class Node(object):
@@ -61,13 +55,14 @@ class Node(object):
 				graph[neighbor] = neighborNode
 
 			self.neighbors.append(neighborNode)
-		# self.neighbors.sort(key=lambda n: n.name)
 
 graph = {}
 players = {}
 colors = []
 counter = 1
 max_depth = 0
+first_next_node_name = ''
+first_next_node_color = ''
 
 def print_graph():
 	for node_name, node in graph.items():
@@ -87,6 +82,7 @@ def max_min_to_str(val):
 	if val == min_val:
 		return '-inf'
 	return val
+
 def print_log(node, depth, value, a, b):
 
 	value = max_min_to_str(value)
@@ -95,22 +91,16 @@ def print_log(node, depth, value, a, b):
 	print ', '.join([node.name, node.color, str(depth), str(value), str(a), str(b)])
 
 
-# def find_best_move(player_Id, depth, score_so_far, visited, frontier, a, b):
 def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 	
-	# print 'node ' + node.name + ' owner ' + str(node.owner.id)
 	node_value = 0
 	if depth % 2 == 0:
-		# node.is_max_node 
 		node_value = min_val
 	else:
 		node_value = max_val
 
-
 	sorted_frontier = list(frontier)
 	sorted_frontier.sort(key=lambda n: n.name)
-
-
 
 	# look ahead
 	has_option = False
@@ -138,7 +128,7 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 
 
 
-
+	# Now we look into what move to take next
 
 	next_player = players[node.owner.id%2+1]
 	next_node_value = 0
@@ -180,31 +170,22 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 					new_neighbors.add(neighbor)
 			frontier.update(new_neighbors)
 
-
-
 			score = find_best_move(next_node, depth+1, score_so_far+point, visited, frontier, a, b)
-			# print 'score ' + str(score)
-			# score = 0
-			# if next_node: 
-			# 	score = next_node.score
-			
-			# node.score = score
-			
-			# if score > max_score:
-			# 	max_score = score
-			# 	best_node = node
-			# 	best_color = color
-			# score += point
-
-
 
 			if depth % 2 == 0:
-				# score += point
-				next_node_value = max(next_node_value, score)
+				if score > next_node_value:
+					next_node_value = score
+					if depth == 0: 
+						global first_next_node_name
+						global first_next_node_color
+						# print 'first_next_node_name'
+						# print first_next_node_name
+						first_next_node_name = next_node.name
+						first_next_node_color = color
+
 				if next_node_value < b:
 					a = max(a, next_node_value)
 				else:
-				# if val >= b:
 					should_break = True
 
 			else:
@@ -212,7 +193,6 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 				next_node_value = min(next_node_value, score)
 				if next_node_value > a:
 					b = min(b, next_node_value)
-				# if val <= a:
 				else:
 					should_break = True
 
@@ -221,10 +201,8 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 
 			# unvisit node, remove added nodes in frontier
 			frontier.difference_update(new_neighbors)
-			
 			next_node.free()
 
-			# if b <= a:
 			if should_break:
 				break
 
@@ -232,13 +210,13 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 		frontier.add(next_node)
 		if should_break:
 			break
-
 	return next_node_value
 
-with open("testcases/t0.txt", 'r') as f:
+with open("testcases/t22.txt", 'r') as f:
 
 	lines = f.read().split('\n')
-	colors = lines[0].strip().split(', ')
+	colors = lines[0].strip().split(',')
+	colors = [color.strip() for color in colors]
 	colors.sort()
 	max_depth = int(lines[2].strip())
 
@@ -303,15 +281,12 @@ with open("testcases/t0.txt", 'r') as f:
 	# 	print ' ' + frontierNode.name,
 
 
-	# print '\n========find best move====================================='
+	print '\n========find best move====================================='
 	# print_log(parent, 0, '-inf', '-inf', 'inf')
 
-	best_first_move = find_best_move(parent, 0, initial_score, visited, frontier, min_val, max_val)
-# def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
+	score = find_best_move(parent, 0, initial_score, visited, frontier, min_val, max_val)
+	print ", ".join([first_next_node_name, first_next_node_color, str(score)])
 
-	print best_first_move  
-	# print best_first_move.color ,
-	# print best_first_move.score + initial_score
 
 
 
