@@ -1,5 +1,6 @@
 import sys
 
+printIt = True
 max_val = sys.maxint
 min_val = -sys.maxint - 1
 
@@ -26,24 +27,18 @@ class Node(object):
 		self.name = name
 		self.color = None
 		self.owner = None
-		self.is_max_node = None
-		self.parent = None
 		self.neighbors = []
-		self.score = 0
 
 	def occupy(self, player, color):
 		self.owner = player
 		self.color = color
-		# print 'player ' + str(player.id),
-		# print ' visiting ' + self.name + ' color: ' + color
 
 	def free(self):
 		self.color = None
 		self.owner = None
-		self.score = 0
 
-	def info(self):
-		print ' '.join([self.name, self.color, str(self.owner.id)])
+	# def info(self):
+	# 	print ' '.join([self.name, self.color, str(self.owner.id)])
 
 	def add_neighbors(self, neighbors, graph):
 		for neighbor in neighbors:
@@ -64,17 +59,17 @@ max_depth = 0
 first_next_node_name = ''
 first_next_node_color = ''
 
-def print_graph():
-	for node_name, node in graph.items():
-		node = graph[node_name]
+# def print_graph():
+# 	for node_name, node in graph.items():
+# 		node = graph[node_name]
 
-		neighbors = node.name + ' :'
-		for neighbor in node.neighbors:
-			neighbors += ' ' + neighbor.name
+# 		neighbors = node.name + ' :'
+# 		for neighbor in node.neighbors:
+# 			neighbors += ' ' + neighbor.name
 
-		if node.owner:
-			neighbors += ' owned by player' + str(node.owner.id) + ' color: ' + node.color
-		print neighbors
+# 		if node.owner:
+# 			neighbors += ' owned by player' + str(node.owner.id) + ' color: ' + node.color
+# 		print neighbors
 
 def max_min_to_str(val):
 	if val == max_val:
@@ -84,7 +79,8 @@ def max_min_to_str(val):
 	return val
 
 def print_log(node, depth, value, a, b):
-
+	if not printIt:
+		return
 	value = max_min_to_str(value)
 	a = max_min_to_str(a)
 	b = max_min_to_str(b)
@@ -99,12 +95,11 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 	else:
 		node_value = max_val
 
-	sorted_frontier = list(frontier)
-	sorted_frontier.sort(key=lambda n: n.name)
+
 
 	# look ahead
 	has_option = False
-	for next_node in sorted_frontier:
+	for next_node in frontier:
 		
 		# find available colors for this node
 		non_adjacent_colors = set(colors)
@@ -139,12 +134,10 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 	else:
 		next_node_value = max_val
 
-
-	# best_node = None
-	# best_color = None
 	should_break = False
 
-
+	sorted_frontier = list(frontier)
+	sorted_frontier.sort(key=lambda n: n.name)
 	for next_node in sorted_frontier:
 		
 		# find available colors for this node
@@ -212,7 +205,7 @@ def find_best_move(node, depth, score_so_far, visited, frontier, a, b):
 			break
 	return next_node_value
 
-with open("testcases/t22.txt", 'r') as f:
+with open("testcases/t5.txt", 'r') as f:
 
 	lines = f.read().split('\n')
 	colors = lines[0].strip().split(',')
@@ -281,7 +274,7 @@ with open("testcases/t22.txt", 'r') as f:
 	# 	print ' ' + frontierNode.name,
 
 
-	print '\n========find best move====================================='
+	# print '\n========find best move====================================='
 	# print_log(parent, 0, '-inf', '-inf', 'inf')
 
 	score = find_best_move(parent, 0, initial_score, visited, frontier, min_val, max_val)
